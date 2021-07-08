@@ -15,7 +15,7 @@ sealed class CoroutineState {
     }
 
     fun with(element: Any): CoroutineState {
-        when(element){
+        when (element) {
             is Disposable -> this.disposableList = RecursiveList.Cons(element, this.disposableList)
             is Job -> this.children = RecursiveList.Cons(element, this.children)
         }
@@ -23,7 +23,7 @@ sealed class CoroutineState {
     }
 
     fun without(element: Any): CoroutineState {
-        when(element){
+        when (element) {
             is Disposable -> this.disposableList = this.disposableList.remove(element)
             is Job -> this.children = this.children.remove(element)
         }
@@ -48,7 +48,7 @@ sealed class CoroutineState {
     }
 
     fun <T> tryComplete(result: Result<T>): CoroutineState {
-        return if(children == RecursiveList.Nil) Complete(result.getOrNull(), result.exceptionOrNull()).from(this)
+        return if (children == RecursiveList.Nil) Complete(result.getOrNull(), result.exceptionOrNull()).from(this)
         else CompleteWaitForChildren(result.getOrNull(), result.exceptionOrNull(), this is Cancelling).from(this)
     }
 
@@ -57,13 +57,21 @@ sealed class CoroutineState {
     }
 
     class InComplete : CoroutineState()
-    class Cancelling: CoroutineState()
-    class CompleteWaitForChildren<T>(val value: T? = null, val exception: Throwable? = null, val isCancelling: Boolean = false) : CoroutineState(){
-        fun copy(value: T? = this.value, exception: Throwable? = this.exception, isCancelling: Boolean = this.isCancelling): CompleteWaitForChildren<T>{
+    class Cancelling : CoroutineState()
+    class CompleteWaitForChildren<T>(
+        val value: T? = null,
+        val exception: Throwable? = null,
+        val isCancelling: Boolean = false,
+    ) : CoroutineState() {
+        fun copy(
+            value: T? = this.value,
+            exception: Throwable? = this.exception,
+            isCancelling: Boolean = this.isCancelling,
+        ): CompleteWaitForChildren<T> {
             return CompleteWaitForChildren(value, exception, isCancelling).from(this) as CompleteWaitForChildren<T>
         }
 
-        fun tryWaitForChildren(onChildComplete: (Job) -> Unit){
+        fun tryWaitForChildren(onChildComplete: (Job) -> Unit) {
             children.forEach { child ->
                 child.invokeOnCompletion {
                     onChildComplete(child)
@@ -72,9 +80,9 @@ sealed class CoroutineState {
         }
 
         fun onChildCompleted(job: Job): CoroutineState {
-            when(val currentChildren = children){
+            when (val currentChildren = children) {
                 is RecursiveList.Cons -> {
-                    if(currentChildren.tail == RecursiveList.Nil && currentChildren.head == job){
+                    if (currentChildren.tail == RecursiveList.Nil && currentChildren.head == job) {
                         return Complete(value, exception).from(this)
                     }
                 }
@@ -82,5 +90,6 @@ sealed class CoroutineState {
             return CompleteWaitForChildren(value, exception, isCancelling).from(this).without(job)
         }
     }
+
     class Complete<T>(val value: T? = null, val exception: Throwable? = null) : CoroutineState()
 }

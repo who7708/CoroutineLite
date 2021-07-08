@@ -13,7 +13,7 @@ private val executor = Executors.newScheduledThreadPool(1) { runnable ->
 }
 
 suspend fun delay(time: Long, unit: TimeUnit = TimeUnit.MILLISECONDS) {
-    if(time <= 0){
+    if (time <= 0) {
         return
     }
 

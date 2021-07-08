@@ -13,12 +13,12 @@ import javax.swing.JFrame
 import javax.swing.JFrame.EXIT_ON_CLOSE
 import javax.swing.JLabel
 
-class MainWindow: JFrame(){
+class MainWindow : JFrame() {
 
     lateinit var button: JButton
     private lateinit var image: JLabel
 
-    fun init(){
+    fun init() {
         button = JButton("Click me to show Logo")
         image = JLabel()
         image.size = Dimension(540, 258)
@@ -27,11 +27,11 @@ class MainWindow: JFrame(){
         contentPane.add(image, BorderLayout.CENTER)
     }
 
-    fun onButtonClick(listener: (ActionEvent)->Unit){
+    fun onButtonClick(listener: (ActionEvent) -> Unit) {
         button.addActionListener(listener)
     }
 
-    fun setLogo(logoData: ByteArray){
+    fun setLogo(logoData: ByteArray) {
         image.icon = ImageIcon(logoData)
     }
 
@@ -46,14 +46,13 @@ fun main() {
         init()
         isVisible = true
 
-        onButtonClick{
+        onButtonClick {
             println("Hello")
         }
     }
 }
 
-
-interface Service{
+interface Service {
     @GET
     fun getLogo(@Url fileUrl: String): retrofit2.Call<ResponseBody>
 }

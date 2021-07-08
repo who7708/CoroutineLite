@@ -7,7 +7,9 @@ package com.bennyhuo.kotlin.coroutines
 private const val WAIT_LOST_THREADS = 10_000L // 10s
 private val ignoreLostThreads = mutableSetOf<String>()
 
-fun ignoreLostThreads(vararg s: String) { ignoreLostThreads += s }
+fun ignoreLostThreads(vararg s: String) {
+    ignoreLostThreads += s
+}
 
 fun currentThreads(): Set<Thread> {
     var estimate = 0

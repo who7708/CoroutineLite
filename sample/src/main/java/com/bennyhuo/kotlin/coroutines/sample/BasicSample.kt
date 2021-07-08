@@ -1,8 +1,8 @@
 package com.bennyhuo.kotlin.coroutines.sample
 
-import com.bennyhuo.kotlin.coroutines.scope.GlobalScope
 import com.bennyhuo.kotlin.coroutines.delay
 import com.bennyhuo.kotlin.coroutines.launch
+import com.bennyhuo.kotlin.coroutines.scope.GlobalScope
 import kotlin.coroutines.suspendCoroutine
 
 suspend fun main() {

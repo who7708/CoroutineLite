@@ -5,11 +5,10 @@ import org.junit.Test
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionException
 import kotlin.random.Random
-import kotlin.test.expect
 
 class CompletableFutureTest {
     @Test
-    fun test(){
+    fun test() {
         val completableFuture = CompletableFuture.supplyAsync {
             Thread.sleep(1000)
             Random.nextInt()

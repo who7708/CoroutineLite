@@ -7,8 +7,8 @@ class StandaloneCoroutine(context: CoroutineContext) : AbstractCoroutine<Unit>(c
 
     override fun handleJobException(e: Throwable): Boolean {
         super.handleJobException(e)
-        context[CoroutineExceptionHandler]?.handleException(context, e) ?:
-                Thread.currentThread().let { it.uncaughtExceptionHandler.uncaughtException(it, e) }
+        context[CoroutineExceptionHandler]?.handleException(context, e) ?: Thread.currentThread()
+            .let { it.uncaughtExceptionHandler.uncaughtException(it, e) }
         return true
     }
 

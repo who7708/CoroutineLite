@@ -4,11 +4,8 @@ import com.bennyhuo.kotlin.coroutines.delay
 import com.bennyhuo.kotlin.coroutines.launch
 import com.bennyhuo.kotlin.coroutines.scope.GlobalScope
 import com.bennyhuo.kotlin.coroutines.utils.log
-import kotlin.concurrent.thread
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
-suspend fun main(){
+suspend fun main() {
     val job = GlobalScope.launch {
         log(1)
         launch {

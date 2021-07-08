@@ -8,7 +8,7 @@ import kotlin.concurrent.thread
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-suspend fun main(){
+suspend fun main() {
     val job = GlobalScope.launch {
         log(1)
         val result = hello()

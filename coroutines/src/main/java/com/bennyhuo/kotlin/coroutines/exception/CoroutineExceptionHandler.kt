@@ -11,7 +11,7 @@ interface CoroutineExceptionHandler : CoroutineContext.Element {
 }
 
 inline fun CoroutineExceptionHandler(crossinline handler: (CoroutineContext, Throwable) -> Unit): CoroutineExceptionHandler =
-        object : AbstractCoroutineContextElement(CoroutineExceptionHandler), CoroutineExceptionHandler {
-            override fun handleException(context: CoroutineContext, exception: Throwable) =
-                    handler.invoke(context, exception)
-        }
+    object : AbstractCoroutineContextElement(CoroutineExceptionHandler), CoroutineExceptionHandler {
+        override fun handleException(context: CoroutineContext, exception: Throwable) =
+            handler.invoke(context, exception)
+    }

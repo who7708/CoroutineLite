@@ -16,13 +16,19 @@ import kotlin.coroutines.startCoroutine
 
 private var coroutineIndex = AtomicInteger(0)
 
-fun CoroutineScope.launch(context: CoroutineContext = EmptyCoroutineContext, block: suspend CoroutineScope.() -> Unit): Job {
+fun CoroutineScope.launch(
+    context: CoroutineContext = EmptyCoroutineContext,
+    block: suspend CoroutineScope.() -> Unit,
+): Job {
     val completion = StandaloneCoroutine(newCoroutineContext(context))
     block.startCoroutine(completion, completion)
     return completion
 }
 
-fun <T> CoroutineScope.async(context: CoroutineContext = Dispatchers.Default, block: suspend CoroutineScope.() -> T): Deferred<T> {
+fun <T> CoroutineScope.async(
+    context: CoroutineContext = Dispatchers.Default,
+    block: suspend CoroutineScope.() -> T,
+): Deferred<T> {
     val completion = DeferredCoroutine<T>(newCoroutineContext(context))
     block.startCoroutine(completion, completion)
     return completion

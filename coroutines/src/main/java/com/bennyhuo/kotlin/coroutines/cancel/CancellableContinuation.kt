@@ -3,7 +3,6 @@ package com.bennyhuo.kotlin.coroutines.cancel
 import com.bennyhuo.kotlin.coroutines.CancellationException
 import com.bennyhuo.kotlin.coroutines.Job
 import com.bennyhuo.kotlin.coroutines.OnCancel
-import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED
@@ -19,9 +18,11 @@ class CancellableContinuation<T>(private val continuation: Continuation<T>) : Co
     val isCompleted: Boolean
         get() = when (state.get()) {
             CancelState.InComplete,
-            is CancelState.CancelHandler -> false
+            is CancelState.CancelHandler,
+            -> false
             is CancelState.Complete<*>,
-            CancelState.Cancelled -> true
+            CancelState.Cancelled,
+            -> true
         }
 
     override fun resumeWith(result: Result<T>) {
@@ -49,12 +50,13 @@ class CancellableContinuation<T>(private val continuation: Continuation<T>) : Co
     fun getResult(): Any? {
         installCancelHandler()
 
-        if(decision.compareAndSet(CancelDecision.UNDECIDED, CancelDecision.SUSPENDED))
+        if (decision.compareAndSet(CancelDecision.UNDECIDED, CancelDecision.SUSPENDED))
             return COROUTINE_SUSPENDED
 
         return when (val currentState = state.get()) {
             is CancelState.CancelHandler,
-            CancelState.InComplete -> COROUTINE_SUSPENDED
+            CancelState.InComplete,
+            -> COROUTINE_SUSPENDED
             CancelState.Cancelled -> throw CancellationException("Continuation is cancelled.")
             is CancelState.Complete<*> -> {
                 (currentState as CancelState.Complete<T>).let {
@@ -84,7 +86,8 @@ class CancellableContinuation<T>(private val continuation: Continuation<T>) : Co
                 CancelState.InComplete -> CancelState.CancelHandler(onCancel)
                 is CancelState.CancelHandler -> throw IllegalStateException("It's prohibited to register multiple handlers.")
                 is CancelState.Complete<*>,
-                CancelState.Cancelled -> prev
+                CancelState.Cancelled,
+                -> prev
             }
         }
         if (newState is CancelState.Cancelled) {
@@ -96,11 +99,13 @@ class CancellableContinuation<T>(private val continuation: Continuation<T>) : Co
         val prevState = state.getAndUpdate { prev ->
             when (prev) {
                 is CancelState.CancelHandler,
-                CancelState.InComplete -> {
+                CancelState.InComplete,
+                -> {
                     CancelState.Cancelled
                 }
                 CancelState.Cancelled,
-                is CancelState.Complete<*> -> {
+                is CancelState.Complete<*>,
+                -> {
                     prev
                 }
             }
@@ -112,9 +117,8 @@ class CancellableContinuation<T>(private val continuation: Continuation<T>) : Co
     }
 }
 
-
 suspend inline fun <T> suspendCancellableCoroutine(
-        crossinline block: (CancellableContinuation<T>) -> Unit
+    crossinline block: (CancellableContinuation<T>) -> Unit,
 ): T = suspendCoroutineUninterceptedOrReturn { continuation ->
     val cancellable = CancellableContinuation(continuation.intercepted())
     block(cancellable)

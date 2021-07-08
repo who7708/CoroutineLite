@@ -1,19 +1,20 @@
 package com.bennyhuo.kotlin.coroutines.sample
 
-import com.bennyhuo.kotlin.coroutines.utils.log
-import com.bennyhuo.kotlin.coroutines.*
+import com.bennyhuo.kotlin.coroutines.async
 import com.bennyhuo.kotlin.coroutines.context.CoroutineName
 import com.bennyhuo.kotlin.coroutines.exception.CoroutineExceptionHandler
+import com.bennyhuo.kotlin.coroutines.launch
 import com.bennyhuo.kotlin.coroutines.scope.GlobalScope
 import com.bennyhuo.kotlin.coroutines.scope.coroutineScope
 import com.bennyhuo.kotlin.coroutines.scope.supervisorScope
+import com.bennyhuo.kotlin.coroutines.utils.log
 
-suspend fun main(){
+suspend fun main() {
 
     coroutineScope {
-        launch {  }
+        launch { }
 
-        async {  }
+        async { }
     }
 
     val exceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
@@ -69,7 +70,7 @@ suspend fun main(){
 
 }
 
-suspend fun noScope(){
+suspend fun noScope() {
     coroutineScope {
         launch {
 

@@ -1,6 +1,9 @@
 package com.bennyhuo.kotlin.coroutines.core
 
-import com.bennyhuo.kotlin.coroutines.*
+import com.bennyhuo.kotlin.coroutines.CancellationException
+import com.bennyhuo.kotlin.coroutines.Job
+import com.bennyhuo.kotlin.coroutines.OnCancel
+import com.bennyhuo.kotlin.coroutines.OnComplete
 import com.bennyhuo.kotlin.coroutines.cancel.suspendCancellableCoroutine
 import com.bennyhuo.kotlin.coroutines.context.CoroutineName
 import com.bennyhuo.kotlin.coroutines.scope.CoroutineScope
@@ -36,7 +39,8 @@ abstract class AbstractCoroutine<T>(context: CoroutineContext) : Job, Continuati
     override val isActive: Boolean
         get() = when (val currentState = state.get()) {
             is CoroutineState.Complete<*>,
-            is CoroutineState.Cancelling -> false
+            is CoroutineState.Cancelling,
+            -> false
             is CoroutineState.CompleteWaitForChildren<*> -> !currentState.isCancelling
             is CoroutineState.InComplete -> true
         }
@@ -46,15 +50,17 @@ abstract class AbstractCoroutine<T>(context: CoroutineContext) : Job, Continuati
             when (prevState) {
                 //although cancelled, flows of job may work out with the normal result.
                 is CoroutineState.Cancelling,
-                is CoroutineState.InComplete -> prevState.tryComplete(result)
+                is CoroutineState.InComplete,
+                -> prevState.tryComplete(result)
                 is CoroutineState.CompleteWaitForChildren<*>,
-                is CoroutineState.Complete<*> -> {
+                is CoroutineState.Complete<*>,
+                -> {
                     throw IllegalStateException("Already completed!")
                 }
             }
         }
 
-        when(newState){
+        when (newState) {
             is CoroutineState.CompleteWaitForChildren<*> -> newState.tryWaitForChildren(::tryCompleteOnChildCompleted)
             is CoroutineState.Complete<*> -> makeCompletion(newState as CoroutineState.Complete<T>)
         }
@@ -65,7 +71,8 @@ abstract class AbstractCoroutine<T>(context: CoroutineContext) : Job, Continuati
         val newState = state.updateAndGet { prev ->
             when (prev) {
                 is CoroutineState.Cancelling,
-                is CoroutineState.InComplete -> {
+                is CoroutineState.InComplete,
+                -> {
                     throw IllegalStateException("Should be waiting for children!")
                 }
                 is CoroutineState.CompleteWaitForChildren<*> -> {
@@ -80,7 +87,7 @@ abstract class AbstractCoroutine<T>(context: CoroutineContext) : Job, Continuati
         }
     }
 
-    private fun makeCompletion(newState: CoroutineState.Complete<T>){
+    private fun makeCompletion(newState: CoroutineState.Complete<T>) {
         val result = if (newState.exception == null) {
             Result.success(newState.value)
         } else {
@@ -98,7 +105,8 @@ abstract class AbstractCoroutine<T>(context: CoroutineContext) : Job, Continuati
         when (state.get()) {
             is CoroutineState.InComplete,
             is CoroutineState.CompleteWaitForChildren<*>,
-            is CoroutineState.Cancelling -> return joinSuspend()
+            is CoroutineState.Cancelling,
+            -> return joinSuspend()
             is CoroutineState.Complete<*> -> {
                 val currentCallingJobState = coroutineContext[Job]?.isActive ?: return
                 if (!currentCallingJobState) {
@@ -123,7 +131,8 @@ abstract class AbstractCoroutine<T>(context: CoroutineContext) : Job, Continuati
                     CoroutineState.Cancelling().from(prev)
                 }
                 is CoroutineState.Cancelling,
-                is CoroutineState.Complete<*> -> prev
+                is CoroutineState.Complete<*>,
+                -> prev
                 is CoroutineState.CompleteWaitForChildren<*> -> {
                     prev.copy(isCancelling = true)
                 }
@@ -154,11 +163,11 @@ abstract class AbstractCoroutine<T>(context: CoroutineContext) : Job, Continuati
         }
         (newState as? CoroutineState.Complete<T>)?.let {
             block(
-                    when {
-                        it.exception != null -> Result.failure(it.exception)
-                        it.value != null -> Result.success(it.value)
-                        else -> throw IllegalStateException("Won't happen.")
-                    }
+                when {
+                    it.exception != null -> Result.failure(it.exception)
+                    it.value != null -> Result.success(it.value)
+                    else -> throw IllegalStateException("Won't happen.")
+                }
             )
         }
         return disposable
@@ -172,7 +181,8 @@ abstract class AbstractCoroutine<T>(context: CoroutineContext) : Job, Continuati
                     CoroutineState.InComplete().from(prev).with(disposable)
                 }
                 is CoroutineState.Cancelling,
-                is CoroutineState.Complete<*> -> {
+                is CoroutineState.Complete<*>,
+                -> {
                     prev
                 }
                 is CoroutineState.CompleteWaitForChildren<*> -> prev.copy().with(disposable)
@@ -213,7 +223,7 @@ abstract class AbstractCoroutine<T>(context: CoroutineContext) : Job, Continuati
             }
             else -> {
                 (parentJob as? AbstractCoroutine<*>)?.handleChildException(e)?.takeIf { it }
-                        ?: handleJobException(e)
+                    ?: handleJobException(e)
             }
         }
     }
@@ -227,14 +237,14 @@ abstract class AbstractCoroutine<T>(context: CoroutineContext) : Job, Continuati
 
     override fun attachChild(child: Job): Disposable {
         state.updateAndGet { prev ->
-            when(prev) {
+            when (prev) {
                 is CoroutineState.InComplete -> {
                     CoroutineState.InComplete().from(prev).with(child)
                 }
                 is CoroutineState.Cancelling -> {
                     CoroutineState.Cancelling().from(prev).with(child)
                 }
-                is CoroutineState.CompleteWaitForChildren<*> ->  prev.copy().with(child)
+                is CoroutineState.CompleteWaitForChildren<*> -> prev.copy().with(child)
                 is CoroutineState.Complete<*> -> throw IllegalStateException("Parent already completed.")
             }
         }

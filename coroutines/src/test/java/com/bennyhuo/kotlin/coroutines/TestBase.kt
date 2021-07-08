@@ -6,10 +6,14 @@ package com.bennyhuo.kotlin.coroutines
 
 import com.bennyhuo.kotlin.coroutines.exception.CoroutineExceptionHandler
 import com.bennyhuo.kotlin.coroutines.scope.CoroutineScope
-import org.junit.*
-import java.util.*
-import java.util.concurrent.atomic.*
-import kotlin.coroutines.*
+import org.junit.After
+import org.junit.Before
+import java.util.Collections
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.coroutines.ContinuationInterceptor
+import kotlin.coroutines.coroutineContext
 import kotlin.test.assertTrue
 
 val VERBOSE = true
@@ -70,9 +74,9 @@ open class TestBase {
     }
 
     private fun makeError(message: Any, cause: Throwable? = null): IllegalStateException =
-            IllegalStateException(message.toString(), cause).also {
-                setError(it)
-            }
+        IllegalStateException(message.toString(), cause).also {
+            setError(it)
+        }
 
     private fun setError(exception: Throwable) {
         error.compareAndSet(null, exception)
@@ -168,23 +172,23 @@ open class TestBase {
     }
 
     fun initPoolsBeforeTest() {
-//        CommonPool.usePrivatePool()
-//        DefaultScheduler.usePrivateScheduler()
+        //        CommonPool.usePrivatePool()
+        //        DefaultScheduler.usePrivateScheduler()
     }
 
     fun shutdownPoolsAfterTest() {
-//        CommonPool.shutdown(SHUTDOWN_TIMEOUT)
-//        DefaultScheduler.shutdown(SHUTDOWN_TIMEOUT)
-//        DefaultExecutor.shutdown(SHUTDOWN_TIMEOUT)
-//        CommonPool.restore()
-//        DefaultScheduler.restore()
+        //        CommonPool.shutdown(SHUTDOWN_TIMEOUT)
+        //        DefaultScheduler.shutdown(SHUTDOWN_TIMEOUT)
+        //        DefaultExecutor.shutdown(SHUTDOWN_TIMEOUT)
+        //        CommonPool.restore()
+        //        DefaultScheduler.restore()
     }
 
     @Suppress("ACTUAL_WITHOUT_EXPECT", "ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
     fun runTest(
-            expected: ((Throwable) -> Boolean)? = null,
-            unhandled: List<(Throwable) -> Boolean> = emptyList(),
-            block: suspend CoroutineScope.() -> Unit
+        expected: ((Throwable) -> Boolean)? = null,
+        unhandled: List<(Throwable) -> Boolean> = emptyList(),
+        block: suspend CoroutineScope.() -> Unit,
     ) {
         var exCount = 0
         var ex: Throwable? = null
