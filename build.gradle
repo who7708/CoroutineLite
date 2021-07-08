@@ -1,6 +1,7 @@
 buildscript {
     repositories {
-        maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/' }
+        // maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/' }
+        maven { url 'https://maven.aliyun.com/repository/public' }
     }
 }
 
@@ -16,7 +17,8 @@ sourceCompatibility = 1.8
 
 allprojects {
     repositories {
-        maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/' }
+        // maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/' }
+        maven { url 'https://maven.aliyun.com/repository/public' }
     }
 }
 
